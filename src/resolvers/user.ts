@@ -7,8 +7,76 @@ import { AuthenticationError } from 'apollo-server-express';
 import { Role } from '../types';
 import { withFilter } from 'apollo-server';
 
+type Token = string;
+
 const USER_ADDED = 'USER_ADDED';
 const USER_UPDATED = 'USER_UPDATED';
+
+const hasUser = (user) => {
+  return !user || (user && user[1] === false);
+};
+
+const isSignedIn = async ({
+  User,
+}, email) => {
+  const emailUser = User.findOne({
+    where: {
+      email,
+      social: { $notLike: 'google%' },
+    },
+    raw: true,
+  });
+
+  if (emailUser) {
+    return true;
+  }
+
+  return false;
+};
+
+const getOrSignUp = async ({
+  User,
+}, socialUser) => {
+  const {
+    email,
+    name,
+    nickname,
+    photo,
+    birthday,
+    gender,
+    phone,
+    social,
+  } = socialUser;
+
+  const foundUser = User.findOrCreate({
+    where: { social: `google_${social}` },
+    defaults: {
+      social: `google_${social}`,
+      email,
+      name,
+      nickname,
+      photo,
+      birthday,
+      gender,
+      phone,
+      verified: email || false,
+    },
+    raw: true,
+  });
+
+  if (hasUser(foundUser)) {
+    return foundUser[0];
+  }
+
+  return null;
+};
+
+const signIn = (userId, appSecret): Token => jwt.sign({
+  userId,
+  role: Role.User,
+},
+appSecret,
+);
 
 const resolver: Resolvers = {
   Query: {
@@ -20,49 +88,42 @@ const resolver: Resolvers = {
     user: (_, args, { models }) => models.User.findOne({ where: args }),
   },
   Mutation: {
-    signInGoogle: async (_, args, { appSecret, models, pubsub }) => {
-      try {
-        if (args.socialUser.email) {
-          const emailUser = await models.User.findOne({
-            where: {
-              email: args.socialUser.email,
-              social: { $notLike: 'google%' },
-            },
-            raw: true,
-          });
+    signInGoogle: async (
+      _, {
+        socialUser,
+      }, {
+        appSecret,
+        models,
+      }) => {
+      const { email } = socialUser;
+      const { User } = models;
 
-          if (emailUser) {
+      try {
+        if (email) {
+          const signedIn = await isSignedIn({
+            User,
+          }, email);
+
+          if (signedIn) {
             throw new Error('Email for current user is already signed in');
           }
         }
 
-        const user = await models.User.findOrCreate({
-          where: { social: `google_${args.socialUser.social}` },
-          defaults: {
-            social: `google_${args.socialUser.social}`,
-            email: args.socialUser.email,
-            name: args.socialUser.name,
-            nickname: args.socialUser.nickname,
-            photo: args.socialUser.photo,
-            birthday: args.socialUser.birthday,
-            gender: args.socialUser.gender,
-            phone: args.socialUser.phone,
-            verified: args.socialUser.email || false,
-          },
-          raw: true,
-        });
-        if (!user || (user && user[1] === false)) {
-          // user exists
+        const user = await getOrSignUp({
+          User,
+        }, socialUser);
+
+        if (!user) {
+          throw new Error('Failed to sign up.');
         }
 
-        const token: string = jwt.sign(
-          {
-            userId: user[0].id,
-            role: Role.User,
-          },
-          appSecret,
-        );
-        return { token, user: user[0] };
+        const { id: userId } = user;
+        const token: Token = signIn(userId, appSecret);
+
+        return {
+          token,
+          user,
+        };
       } catch (err) {
         throw new Error(err);
       }
