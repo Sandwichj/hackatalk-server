@@ -20,7 +20,27 @@ const hasUser = (user) => {
   return !user || (user && user[1] === false);
 };
 
-const isSignedIn = async ({
+const isSignedIn = async ({ User }, user, queryOptions = {}) => {
+  const {
+    email,
+  } = user;
+
+  const emailUser = User.findOne({
+    raw: true,
+    where: {
+      email,
+    },
+    ...queryOptions,
+  });
+
+  if (emailUser) {
+    return true;
+  }
+
+  return false;
+};
+
+const isSignedInBySocial = async ({
   User,
 },
   socialUser,
@@ -30,19 +50,12 @@ const isSignedIn = async ({
     email,
   } = socialUser;
 
-  const emailUser = User.findOne({
+  return isSignedIn({ User }, socialUser, {
     where: {
       email,
       social: { $notLike: `${socialName}%` },
     },
-    raw: true,
   });
-
-  if (emailUser) {
-    return true;
-  }
-
-  return false;
 };
 
 const getOrSignUp = async ({
@@ -114,7 +127,7 @@ const resolver: Resolvers = {
 
       try {
         if (email) {
-          const signedIn = await isSignedIn({ User }, socialUser, SOCIAL_NAME.GOOGLE);
+          const signedIn = await isSignedInBySocial({ User }, socialUser, SOCIAL_NAME.GOOGLE);
 
           if (signedIn) {
             throw new Error('Email for current user is already signed in');
@@ -150,7 +163,7 @@ const resolver: Resolvers = {
 
       try {
         if (email) {
-          const signedIn = await isSignedIn({ User }, socialUser, SOCIAL_NAME.FACEBOOK);
+          const signedIn = await isSignedInBySocial({ User }, socialUser, SOCIAL_NAME.FACEBOOK);
 
           if (signedIn) {
             throw new Error('Email for current user is already signed in');
@@ -174,30 +187,40 @@ const resolver: Resolvers = {
         throw new Error(err);
       }
     },
-    signUp: async (_, args, { appSecret, models, pubsub }) => {
-      const emailUser: any = await models.User.findOne({
-        where: {
-          email: args.user.email,
-        },
-        raw: true,
-      });
-
-      if (emailUser) {
-        throw new Error('Email for current user is already signed up.');
-      }
-      args.user.password = await encryptPassword(args.user.password);
-      const user = await models.User.create(args.user, { raw: true });
-      const token: string = jwt.sign(
-        {
-          userId: user.id,
-          role: Role.User,
-        },
+    signUp: async (
+      _, {
+        user,
+      }, {
         appSecret,
+        models,
+        pubsub,
+      }) => {
+      const { password } = user;
+      const { User } = models;
+      const signedIn = await isSignedIn({ User }, user);
+
+      if (signedIn) {
+        throw new Error('Email for current user is already signed in');
+      }
+
+      const encryptedPassword = await encryptPassword(password);
+      const userToCreate = {
+        ...user,
+        password: encryptedPassword,
+      };
+
+      const newUser = await models.User.create(userToCreate, { raw: true });
+      const token: string = jwt.sign({
+        userId: newUser.id,
+        role: Role.User,
+      },
+      appSecret,
       );
 
       pubsub.publish(USER_ADDED, {
-        userAdded: user,
+        userAdded: newUser,
       });
+
       return { token, user };
     },
     updateProfile: async (_, args, { appSecret, getUser, models, pubsub }) => {
