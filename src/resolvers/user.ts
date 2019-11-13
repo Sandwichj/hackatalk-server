@@ -11,6 +11,10 @@ type Token = string;
 
 const USER_ADDED = 'USER_ADDED';
 const USER_UPDATED = 'USER_UPDATED';
+const SOCIAL_NAME = {
+  GOOGLE: 'google',
+  FACEBOOK: 'facebook',
+};
 
 const hasUser = (user) => {
   return !user || (user && user[1] === false);
@@ -18,11 +22,18 @@ const hasUser = (user) => {
 
 const isSignedIn = async ({
   User,
-}, email) => {
+},
+  socialUser,
+  socialName,
+) => {
+  const {
+    email,
+  } = socialUser;
+
   const emailUser = User.findOne({
     where: {
       email,
-      social: { $notLike: 'google%' },
+      social: { $notLike: `${socialName}%` },
     },
     raw: true,
   });
@@ -36,7 +47,10 @@ const isSignedIn = async ({
 
 const getOrSignUp = async ({
   User,
-}, socialUser) => {
+},
+  socialUser,
+  socialName,
+) => {
   const {
     email,
     name,
@@ -49,9 +63,9 @@ const getOrSignUp = async ({
   } = socialUser;
 
   const foundUser = User.findOrCreate({
-    where: { social: `google_${social}` },
+    where: { social: `${socialName}_${social}` },
     defaults: {
-      social: `google_${social}`,
+      social: `${socialName}_${social}`,
       email,
       name,
       nickname,
@@ -100,18 +114,14 @@ const resolver: Resolvers = {
 
       try {
         if (email) {
-          const signedIn = await isSignedIn({
-            User,
-          }, email);
+          const signedIn = await isSignedIn({ User }, socialUser, SOCIAL_NAME.GOOGLE);
 
           if (signedIn) {
             throw new Error('Email for current user is already signed in');
           }
         }
 
-        const user = await getOrSignUp({
-          User,
-        }, socialUser);
+        const user = await getOrSignUp({ User }, socialUser, SOCIAL_NAME.GOOGLE);
 
         if (!user) {
           throw new Error('Failed to sign up.');
@@ -128,49 +138,38 @@ const resolver: Resolvers = {
         throw new Error(err);
       }
     },
-    signInFacebook: async (_, args, { appSecret, models, pubsub }) => {
-      try {
-        if (args.socialUser.email) {
-          const emailUser = await models.User.findOne({
-            where: {
-              email: args.socialUser.email,
-              social: { $notLike: 'facebook%' },
-            },
-            raw: true,
-          });
+    signInFacebook: async (
+      _, {
+        socialUser,
+      }, {
+        appSecret,
+        models,
+      }) => {
+      const { email } = socialUser;
+      const { User } = models;
 
-          if (emailUser) {
+      try {
+        if (email) {
+          const signedIn = await isSignedIn({ User }, socialUser, SOCIAL_NAME.FACEBOOK);
+
+          if (signedIn) {
             throw new Error('Email for current user is already signed in');
           }
         }
 
-        const user = await models.User.findOrCreate({
-          where: { social: `facebook_${args.socialUser.social}` },
-          defaults: {
-            social: `facebook_${args.socialUser.social}`,
-            email: args.socialUser.email,
-            nickname: args.socialUser.name,
-            name: args.socialUser.name,
-            birthday: args.socialUser.birthday,
-            gender: args.socialUser.gender,
-            phone: args.socialUser.phone,
-            verified: args.socialUser.email || false,
-          },
-          raw: true,
-        });
+        const user = await getOrSignUp({ User }, socialUser, SOCIAL_NAME.FACEBOOK);
 
-        if (!user || (user && user[1] === false)) {
-          // user exists
+        if (!user) {
+          throw new Error('Failed to sign up.');
         }
 
-        const token: string = jwt.sign(
-          {
-            userId: user[0].id,
-            role: Role.User,
-          },
-          appSecret,
-        );
-        return { token, user: user[0] };
+        const { id: userId } = user;
+        const token: Token = signIn(userId, appSecret);
+
+        return {
+          token,
+          user,
+        };
       } catch (err) {
         throw new Error(err);
       }
