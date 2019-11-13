@@ -209,19 +209,19 @@ const resolver: Resolvers = {
         password: encryptedPassword,
       };
 
-      const newUser = await models.User.create(userToCreate, { raw: true });
+      const createdUser = await models.User.create(userToCreate, { raw: true });
       const token: string = jwt.sign({
-        userId: newUser.id,
+        userId: createdUser.id,
         role: Role.User,
       },
       appSecret,
       );
 
       pubsub.publish(USER_ADDED, {
-        userAdded: newUser,
+        userAdded: createdUser,
       });
 
-      return { token, user };
+      return { token, user: createdUser };
     },
     updateProfile: async (_, args, { appSecret, getUser, models, pubsub }) => {
       try {
