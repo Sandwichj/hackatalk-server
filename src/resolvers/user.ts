@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 
 import { Resolvers, UserResolvers } from '../generated/graphql';
-import { checkPassword, encryptPassword } from '../utils/encryption';
+import { encryptPassword, validatePassword } from '../utils/password';
 
 import { AuthenticationError } from 'apollo-server-express';
 import { Role } from '../types';
