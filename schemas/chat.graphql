@@ -1,0 +1,14 @@
+scalar DateTime
+
+type Chat {
+  id: String
+  sender: User!
+  type: String!
+  text: String
+  photoUrl: String
+  audioUrl: String
+  readCount: Integer
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}

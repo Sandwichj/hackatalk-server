@@ -1,0 +1,10 @@
+scalar DateTime
+
+type Chatroom {
+  id: String
+  lastChat: Chat
+  owner: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+}

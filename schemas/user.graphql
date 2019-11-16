@@ -17,14 +17,14 @@ type User {
   photo: String
   birthday: Date
   gender: Gender
-  phone: String
   social: String
+  phone: String
   verified: Boolean
   notifications: [Notification]
   reviews: [Review]
-  created: DateTime!
-  updated: DateTime!
-  deleted: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
 }
 
 input UserCreateInput {

@@ -131,14 +131,14 @@ export type User = {
   photo?: Maybe<Scalars['String']>,
   birthday?: Maybe<Scalars['Date']>,
   gender?: Maybe<Gender>,
-  phone?: Maybe<Scalars['String']>,
   social?: Maybe<Scalars['String']>,
+  phone?: Maybe<Scalars['String']>,
   verified?: Maybe<Scalars['Boolean']>,
   notifications?: Maybe<Array<Maybe<Notification>>>,
   reviews?: Maybe<Array<Maybe<Review>>>,
-  created: Scalars['DateTime'],
-  updated: Scalars['DateTime'],
-  deleted?: Maybe<Scalars['DateTime']>,
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  deletedAt?: Maybe<Scalars['DateTime']>,
 };
 
 export type UserCreateInput = {
@@ -334,14 +334,14 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
   photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   birthday?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
   gender?: Resolver<Maybe<ResolversTypes['Gender']>, ParentType, ContextType>,
-  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   social?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  phone?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   verified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   notifications?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>,
   reviews?: Resolver<Maybe<Array<Maybe<ResolversTypes['Review']>>>, ParentType, ContextType>,
-  created?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updated?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  deleted?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
 };
 
 export type Resolvers<ContextType = any> = {
