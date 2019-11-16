@@ -16,9 +16,20 @@ const SOCIAL_NAME = {
   FACEBOOK: 'facebook',
 };
 
+const getUser = async ({ User }, id) => {
+  return User.findOne({
+    where: {
+      id,
+    },
+    raw: true,
+  });
+};
+
 const hasUser = (user) => {
   return !user || (user && user[1] === false);
 };
+
+const isValidUser = (signedInUser, user) => signedInUser.id === user.id;
 
 const isSignedIn = async ({ User }, user, queryOptions = {}) => {
   const {
@@ -104,6 +115,38 @@ const signIn = (userId, appSecret): Token => jwt.sign({
 },
 appSecret,
 );
+
+const udpateUser = async ({
+  User,
+},
+  id,
+  userData,
+) => {
+  return User.update(
+    userData, {
+      where: {
+        id,
+      },
+    },
+    { raw: true },
+  );
+};
+
+const getNotificationsByUserId = ({ Notification }, userId) => {
+  return Notification.findAll({
+    where: {
+      userId,
+    },
+  });
+};
+
+const getReviewsByUserId = ({ Review }, userId) => {
+  return Review.findAll({
+    where: {
+      userId,
+    },
+  });
+};
 
 const resolver: Resolvers = {
   Query: {
@@ -223,33 +266,29 @@ const resolver: Resolvers = {
 
       return { token, user: createdUser };
     },
-    updateProfile: async (_, args, { appSecret, getUser, models, pubsub }) => {
+    updateProfile: async (
+      _,
+      args, {
+        getUser: getSignedInUser,
+        models,
+        pubsub,
+      }) => {
+      const { User } = models;
+      const { user } = args;
+      const { id } = user;
+      const signedInUser = await getSignedInUser();
+
       try {
-        const auth = await getUser();
-        if (auth.id !== args.user.id) {
+        if (!isValidUser(signedInUser, user)) {
           throw new AuthenticationError(
             'User can update his or her own profile',
           );
         }
-        models.User.update(
-          args,
-          {
-            where: {
-              id: args.user.id,
-            },
-          },
-          { raw: true },
-        );
 
-        const user = await models.User.findOne({
-          where: {
-            id: args.user.id,
-          },
-          raw: true,
-        });
+        const updatedUser = await udpateUser({ User }, id, args);
+        pubsub.publish(USER_UPDATED, { updatedUser });
 
-        pubsub.publish(USER_UPDATED, { user });
-        return user;
+        return updatedUser;
       } catch (err) {
         throw new Error(err);
       }
@@ -262,26 +301,26 @@ const resolver: Resolvers = {
     userUpdated: {
       subscribe: withFilter(
         (_, args, { pubsub }) => pubsub.asyncIterator(USER_UPDATED),
-        (payload, variables) => {
-          return payload.userUpdated.id === variables.id;
+        (payload, user) => {
+          const { userUpdated: updatedUser } = payload;
+
+          return updatedUser.id === user.id;
         },
       ),
     },
   },
   User: {
-    notifications: (_, args, { models }, info) => {
-      return models.Notification.findAll({
-        where: {
-          userId: _.id,
-        },
-      });
+    notifications: (user, args, { models }) => {
+      const { id } = user;
+      const { Notification } = models;
+
+      return getNotificationsByUserId({ Notification }, id);
     },
-    reviews: (_, args, { models }, info) => {
-      return models.Review.findAll({
-        where: {
-          userId: _.id,
-        },
-      });
+    reviews: (user, args, { models }) => {
+      const { id } = user;
+      const { Review } = models;
+
+      return getReviewsByUserId({ Review }, id);
     },
   },
 };
