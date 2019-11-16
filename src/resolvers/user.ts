@@ -16,7 +16,7 @@ const SOCIAL_NAME = {
   FACEBOOK: 'facebook',
 };
 
-const getUser = async ({ User }, id) => {
+const getUser = async (User, id) => {
   return User.findOne({
     where: {
       id,
@@ -31,7 +31,7 @@ const hasUser = (user) => {
 
 const isValidUser = (signedInUser, user) => signedInUser.id === user.id;
 
-const isSignedIn = async ({ User }, user, queryOptions = {}) => {
+const isSignedIn = async (User, user, queryOptions = {}) => {
   const {
     email,
   } = user;
@@ -51,9 +51,8 @@ const isSignedIn = async ({ User }, user, queryOptions = {}) => {
   return false;
 };
 
-const isSignedInBySocial = async ({
+const isSignedInBySocial = async (
   User,
-},
   socialUser,
   socialName,
 ) => {
@@ -61,7 +60,7 @@ const isSignedInBySocial = async ({
     email,
   } = socialUser;
 
-  return isSignedIn({ User }, socialUser, {
+  return isSignedIn(User, socialUser, {
     where: {
       email,
       social: { $notLike: `${socialName}%` },
@@ -69,9 +68,8 @@ const isSignedInBySocial = async ({
   });
 };
 
-const getOrSignUp = async ({
+const getOrSignUp = async (
   User,
-},
   socialUser,
   socialName,
 ) => {
@@ -132,7 +130,7 @@ const udpateUser = async ({
   );
 };
 
-const getNotificationsByUserId = ({ Notification }, userId) => {
+const getNotificationsByUserId = (Notification, userId) => {
   return Notification.findAll({
     where: {
       userId,
@@ -140,7 +138,7 @@ const getNotificationsByUserId = ({ Notification }, userId) => {
   });
 };
 
-const getReviewsByUserId = ({ Review }, userId) => {
+const getReviewsByUserId = (Review, userId) => {
   return Review.findAll({
     where: {
       userId,
@@ -150,9 +148,18 @@ const getReviewsByUserId = ({ Review }, userId) => {
 
 const resolver: Resolvers = {
   Query: {
-    users: async (_, args, { getUser, models }, info) => {
-      const user = await getUser();
-      if (!user) throw new AuthenticationError('User is not logged in');
+    users: async (
+      _,
+      args, {
+        getUser: getSignedInUser,
+        models,
+      },
+      info,
+    ) => {
+      const signedInUser = await getSignedInUser();
+
+      if (!signedInUser) throw new AuthenticationError('User is not signed in');
+
       return models.User.findAll();
     },
     user: (_, args, { models }) => models.User.findOne({ where: args }),
@@ -170,14 +177,14 @@ const resolver: Resolvers = {
 
       try {
         if (email) {
-          const signedIn = await isSignedInBySocial({ User }, socialUser, SOCIAL_NAME.GOOGLE);
+          const signedIn = await isSignedInBySocial(User, socialUser, SOCIAL_NAME.GOOGLE);
 
           if (signedIn) {
             throw new Error('Email for current user is already signed in');
           }
         }
 
-        const user = await getOrSignUp({ User }, socialUser, SOCIAL_NAME.GOOGLE);
+        const user = await getOrSignUp(User, socialUser, SOCIAL_NAME.GOOGLE);
 
         if (!user) {
           throw new Error('Failed to sign up.');
@@ -206,14 +213,14 @@ const resolver: Resolvers = {
 
       try {
         if (email) {
-          const signedIn = await isSignedInBySocial({ User }, socialUser, SOCIAL_NAME.FACEBOOK);
+          const signedIn = await isSignedInBySocial(User, socialUser, SOCIAL_NAME.FACEBOOK);
 
           if (signedIn) {
             throw new Error('Email for current user is already signed in');
           }
         }
 
-        const user = await getOrSignUp({ User }, socialUser, SOCIAL_NAME.FACEBOOK);
+        const user = await getOrSignUp(User, socialUser, SOCIAL_NAME.FACEBOOK);
 
         if (!user) {
           throw new Error('Failed to sign up.');
@@ -240,7 +247,7 @@ const resolver: Resolvers = {
       }) => {
       const { password } = user;
       const { User } = models;
-      const signedIn = await isSignedIn({ User }, user);
+      const signedIn = await isSignedIn(User, user);
 
       if (signedIn) {
         throw new Error('Email for current user is already signed in');
@@ -252,7 +259,7 @@ const resolver: Resolvers = {
         password: encryptedPassword,
       };
 
-      const createdUser = await models.User.create(userToCreate, { raw: true });
+      const createdUser = await User.create(userToCreate, { raw: true });
       const token: string = jwt.sign({
         userId: createdUser.id,
         role: Role.User,
@@ -278,13 +285,14 @@ const resolver: Resolvers = {
       const { id } = user;
       const signedInUser = await getSignedInUser();
 
-      try {
-        if (!isValidUser(signedInUser, user)) {
-          throw new AuthenticationError(
-            'User can update his or her own profile',
-          );
-        }
+      if (!signedInUser) throw new AuthenticationError('User is not signed in');
+      if (!isValidUser(signedInUser, user)) {
+        throw new AuthenticationError(
+          'User can update his or her own profile',
+        );
+      }
 
+      try {
         const updatedUser = await udpateUser({ User }, id, args);
         pubsub.publish(USER_UPDATED, { updatedUser });
 
@@ -314,13 +322,13 @@ const resolver: Resolvers = {
       const { id } = user;
       const { Notification } = models;
 
-      return getNotificationsByUserId({ Notification }, id);
+      return getNotificationsByUserId(Notification, id);
     },
     reviews: (user, args, { models }) => {
       const { id } = user;
       const { Review } = models;
 
-      return getReviewsByUserId({ Review }, id);
+      return getReviewsByUserId(Review, id);
     },
   },
 };
