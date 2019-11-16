@@ -4,7 +4,14 @@ import Notification from './Notification';
 import Review from './Review';
 import sequelize from '../db';
 
-const { STRING, BOOLEAN, DATE, UUID, UUIDV1, ENUM } = DataTypes;
+const {
+  STRING,
+  BOOLEAN,
+  DATE,
+  UUID,
+  UUIDV1,
+  ENUM,
+} = DataTypes;
 
 enum Gender {
   Male,
@@ -38,40 +45,37 @@ class User extends Model {
 
   public readonly deletedAt!: Date;
 }
-User.init(
-  {
-    id: {
-      type: UUID,
-      defaultValue: UUIDV1,
-      allowNull: false,
-      primaryKey: true,
-    },
-    email: {
-      type: STRING,
-    },
-    password: {
-      type: STRING,
-      allowNull: true,
-    },
-    name: STRING,
-    nickname: STRING,
-    photo: STRING,
-    birthday: DATE,
-    gender: ENUM('MALE', 'FEMALE'),
-    phone: STRING,
-    social: STRING,
-    verified: {
-      type: BOOLEAN,
-      defaultValue: false,
-    },
+User.init({
+  id: {
+    type: UUID,
+    defaultValue: UUIDV1,
+    allowNull: false,
+    primaryKey: true,
   },
-  {
-    sequelize,
-    modelName: 'user',
-    timestamps: true,
-    paranoid: true,
+  email: {
+    type: STRING,
   },
-);
+  password: {
+    type: STRING,
+    allowNull: true,
+  },
+  name: STRING,
+  nickname: STRING,
+  photo: STRING,
+  birthday: DATE,
+  gender: ENUM('MALE', 'FEMALE'),
+  phone: STRING,
+  social: STRING,
+  verified: {
+    type: BOOLEAN,
+    defaultValue: false,
+  },
+}, {
+  sequelize,
+  modelName: 'user',
+  timestamps: true,
+  paranoid: true,
+});
 
 User.hasMany(Notification);
 Notification.belongsTo(User);
