@@ -82,4 +82,33 @@ Notification.belongsTo(User);
 User.hasMany(Review);
 Review.belongsTo(User);
 
+export const udpateUser = async ({
+  User,
+},
+  id,
+  userData,
+) => {
+  return User.update(
+    userData, {
+      where: {
+        id,
+      },
+    },
+    { raw: true },
+  );
+};
+
+export const getUser = async (User, id) => {
+  return User.findOne({
+    where: {
+      id,
+    },
+    raw: true,
+  });
+};
+
+export const hasUser = (user) => {
+  return !user || (user && user[1] === false);
+};
+
 export default User;

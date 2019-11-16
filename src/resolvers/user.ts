@@ -1,149 +1,25 @@
-import * as jwt from 'jsonwebtoken';
-
 import { Resolvers, UserResolvers } from '../generated/graphql';
+import {
+  Token,
+  getOrSignUp,
+  isSignedIn,
+  isSignedInBySocial,
+  isValidUser,
+  signIn,
+} from '../models/Auth';
 import { encryptPassword, validatePassword } from '../utils/password';
 
 import { AuthenticationError } from 'apollo-server-express';
-import { Role } from '../types';
+import { getNotificationsByUserId } from '../models/Notification';
+import { getReviewsByUserId } from '../models/Review';
+import { udpateUser } from '../models/User';
 import { withFilter } from 'apollo-server';
-
-type Token = string;
 
 const USER_ADDED = 'USER_ADDED';
 const USER_UPDATED = 'USER_UPDATED';
 const SOCIAL_NAME = {
   GOOGLE: 'google',
   FACEBOOK: 'facebook',
-};
-
-const getUser = async (User, id) => {
-  return User.findOne({
-    where: {
-      id,
-    },
-    raw: true,
-  });
-};
-
-const hasUser = (user) => {
-  return !user || (user && user[1] === false);
-};
-
-const isValidUser = (signedInUser, user) => signedInUser.id === user.id;
-
-const isSignedIn = async (User, user, queryOptions = {}) => {
-  const {
-    email,
-  } = user;
-
-  const emailUser = User.findOne({
-    raw: true,
-    where: {
-      email,
-    },
-    ...queryOptions,
-  });
-
-  if (emailUser) {
-    return true;
-  }
-
-  return false;
-};
-
-const isSignedInBySocial = async (
-  User,
-  socialUser,
-  socialName,
-) => {
-  const {
-    email,
-  } = socialUser;
-
-  return isSignedIn(User, socialUser, {
-    where: {
-      email,
-      social: { $notLike: `${socialName}%` },
-    },
-  });
-};
-
-const getOrSignUp = async (
-  User,
-  socialUser,
-  socialName,
-) => {
-  const {
-    email,
-    name,
-    nickname,
-    photo,
-    birthday,
-    gender,
-    phone,
-    social,
-  } = socialUser;
-
-  const foundUser = User.findOrCreate({
-    where: { social: `${socialName}_${social}` },
-    defaults: {
-      social: `${socialName}_${social}`,
-      email,
-      name,
-      nickname,
-      photo,
-      birthday,
-      gender,
-      phone,
-      verified: email || false,
-    },
-    raw: true,
-  });
-
-  if (hasUser(foundUser)) {
-    return foundUser[0];
-  }
-
-  return null;
-};
-
-const signIn = (userId, appSecret): Token => jwt.sign({
-  userId,
-  role: Role.User,
-},
-appSecret,
-);
-
-const udpateUser = async ({
-  User,
-},
-  id,
-  userData,
-) => {
-  return User.update(
-    userData, {
-      where: {
-        id,
-      },
-    },
-    { raw: true },
-  );
-};
-
-const getNotificationsByUserId = (Notification, userId) => {
-  return Notification.findAll({
-    where: {
-      userId,
-    },
-  });
-};
-
-const getReviewsByUserId = (Review, userId) => {
-  return Review.findAll({
-    where: {
-      userId,
-    },
-  });
 };
 
 const resolver: Resolvers = {
@@ -260,18 +136,16 @@ const resolver: Resolvers = {
       };
 
       const createdUser = await User.create(userToCreate, { raw: true });
-      const token: string = jwt.sign({
-        userId: createdUser.id,
-        role: Role.User,
-      },
-      appSecret,
-      );
+      const token: string = signIn(createdUser.id, appSecret);
 
       pubsub.publish(USER_ADDED, {
         userAdded: createdUser,
       });
 
-      return { token, user: createdUser };
+      return {
+        token,
+        user: createdUser,
+      };
     },
     updateProfile: async (
       _,

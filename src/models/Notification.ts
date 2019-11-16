@@ -29,4 +29,12 @@ Notification.init({
   paranoid: true,
 });
 
+export const getNotificationsByUserId = (Notification, userId) => {
+  return Notification.findAll({
+    where: {
+      userId,
+    },
+  });
+};
+
 export default Notification;

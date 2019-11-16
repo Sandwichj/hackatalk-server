@@ -29,4 +29,12 @@ Review.init({
   paranoid: true,
 });
 
+export const getReviewsByUserId = (Review, userId) => {
+  return Review.findAll({
+    where: {
+      userId,
+    },
+  });
+};
+
 export default Review;

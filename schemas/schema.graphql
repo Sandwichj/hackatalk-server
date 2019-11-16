@@ -1,4 +1,5 @@
 # import User from "user.graphql"
+# import Auth from "auth.graphql"
 # import Notification from "notification.graphql"
 # import Review from "review.graphql"
 
