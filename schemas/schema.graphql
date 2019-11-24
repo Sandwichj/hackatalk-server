@@ -2,6 +2,7 @@
 # import Auth from "auth.graphql"
 # import Notification from "notification.graphql"
 # import Review from "review.graphql"
+# import Chatroom from "chatroom.graphql"
 # import Chat from "chat.graphql"
 
 type Query {
@@ -10,6 +11,7 @@ type Query {
   reviews: [Review!]!
   review(id: ID!): Review
   chats: [Chat!]!
+  chatrooms: [Chatroom!]!
 }
 
 type Mutation {

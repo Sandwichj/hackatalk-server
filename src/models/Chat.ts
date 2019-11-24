@@ -6,11 +6,14 @@ import {
   UUIDV4,
 } from 'sequelize';
 
+import Chatroom from './Chatroom';
 import User from './User';
 import sequelize from '../db';
 
 class Chat extends Model {
   public id!: string;
+
+  public chatroomId!: string;
 
   public senderId!: string;
 
@@ -55,6 +58,9 @@ Chat.init({
   paranoid: true,
 });
 
+Chat.belongsTo(Chatroom, {
+  as: 'chatroom',
+});
 User.belongsTo(Chat, {
   as: 'sender',
 });

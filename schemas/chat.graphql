@@ -2,6 +2,7 @@ scalar DateTime
 
 type Chat {
   id: String
+  chatroom: Chatroom!
   sender: User!
   type: String!
   text: String

@@ -21,12 +21,22 @@ export type AuthPayload = {
 export type Chat = {
    __typename?: 'Chat',
   id?: Maybe<Scalars['String']>,
+  chatroom: Chatroom,
   sender: User,
   type: Scalars['String'],
   text?: Maybe<Scalars['String']>,
   photoUrl?: Maybe<Scalars['String']>,
   audioUrl?: Maybe<Scalars['String']>,
   readCount?: Maybe<Scalars['Int']>,
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  deletedAt?: Maybe<Scalars['DateTime']>,
+};
+
+export type Chatroom = {
+   __typename?: 'Chatroom',
+  id?: Maybe<Scalars['String']>,
+  owner: User,
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   deletedAt?: Maybe<Scalars['DateTime']>,
@@ -97,6 +107,7 @@ export type Query = {
   reviews: Array<Review>,
   review?: Maybe<Review>,
   chats: Array<Chat>,
+  chatrooms: Array<Chatroom>,
 };
 
 
@@ -260,6 +271,7 @@ export type ResolversTypes = {
   Review: ResolverTypeWrapper<Review>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
   Chat: ResolverTypeWrapper<Chat>,
+  Chatroom: ResolverTypeWrapper<Chatroom>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
   Mutation: ResolverTypeWrapper<{}>,
   SocialUserCreateInput: SocialUserCreateInput,
@@ -284,6 +296,7 @@ export type ResolversParentTypes = {
   Review: Review,
   Float: Scalars['Float'],
   Chat: Chat,
+  Chatroom: Chatroom,
   Int: Scalars['Int'],
   Mutation: {},
   SocialUserCreateInput: SocialUserCreateInput,
@@ -301,12 +314,21 @@ export type AuthPayloadResolvers<ContextType = any, ParentType extends Resolvers
 
 export type ChatResolvers<ContextType = any, ParentType extends ResolversParentTypes['Chat'] = ResolversParentTypes['Chat']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  chatroom?: Resolver<ResolversTypes['Chatroom'], ParentType, ContextType>,
   sender?: Resolver<ResolversTypes['User'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   text?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   photoUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   audioUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   readCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+};
+
+export type ChatroomResolvers<ContextType = any, ParentType extends ResolversParentTypes['Chatroom'] = ResolversParentTypes['Chatroom']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  owner?: Resolver<ResolversTypes['User'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
@@ -343,6 +365,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   reviews?: Resolver<Array<ResolversTypes['Review']>, ParentType, ContextType>,
   review?: Resolver<Maybe<ResolversTypes['Review']>, ParentType, ContextType, RequireFields<QueryReviewArgs, 'id'>>,
   chats?: Resolver<Array<ResolversTypes['Chat']>, ParentType, ContextType>,
+  chatrooms?: Resolver<Array<ResolversTypes['Chatroom']>, ParentType, ContextType>,
 };
 
 export type ReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['Review'] = ResolversParentTypes['Review']> = {
@@ -380,6 +403,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 export type Resolvers<ContextType = any> = {
   AuthPayload?: AuthPayloadResolvers<ContextType>,
   Chat?: ChatResolvers<ContextType>,
+  Chatroom?: ChatroomResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Mutation?: MutationResolvers<ContextType>,

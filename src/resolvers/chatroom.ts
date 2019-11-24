@@ -1,17 +1,17 @@
 import { Resolvers } from '../generated/graphql';
-import { getChatsByChatroomId } from '../models/Chat';
+import { getChatroomsByOwnerId } from '../models/Chatroom';
 
 const resolver: Resolvers = {
   Query: {
-    chats: async (
+    chatrooms: async (
       _,
       args, {
         models,
       },
     ) => {
-      const { Chat } = models;
+      const { Chatroom } = models;
 
-      return getChatsByChatroomId(Chat, 1);
+      return getChatroomsByOwnerId(Chatroom, 1);
     },
   },
 };
