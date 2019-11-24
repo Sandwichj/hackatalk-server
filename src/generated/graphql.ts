@@ -18,6 +18,20 @@ export type AuthPayload = {
   user: User,
 };
 
+export type Chat = {
+   __typename?: 'Chat',
+  id?: Maybe<Scalars['String']>,
+  sender: User,
+  type: Scalars['String'],
+  text?: Maybe<Scalars['String']>,
+  photoUrl?: Maybe<Scalars['String']>,
+  audioUrl?: Maybe<Scalars['String']>,
+  readCount?: Maybe<Scalars['Int']>,
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  deletedAt?: Maybe<Scalars['DateTime']>,
+};
+
 
 
 export enum Gender {
@@ -82,6 +96,7 @@ export type Query = {
   user?: Maybe<User>,
   reviews: Array<Review>,
   review?: Maybe<Review>,
+  chats: Array<Chat>,
 };
 
 
@@ -244,6 +259,8 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   Review: ResolverTypeWrapper<Review>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
+  Chat: ResolverTypeWrapper<Chat>,
+  Int: ResolverTypeWrapper<Scalars['Int']>,
   Mutation: ResolverTypeWrapper<{}>,
   SocialUserCreateInput: SocialUserCreateInput,
   AuthPayload: ResolverTypeWrapper<AuthPayload>,
@@ -266,6 +283,8 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime'],
   Review: Review,
   Float: Scalars['Float'],
+  Chat: Chat,
+  Int: Scalars['Int'],
   Mutation: {},
   SocialUserCreateInput: SocialUserCreateInput,
   AuthPayload: AuthPayload,
@@ -278,6 +297,19 @@ export type ResolversParentTypes = {
 export type AuthPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['AuthPayload'] = ResolversParentTypes['AuthPayload']> = {
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>,
+};
+
+export type ChatResolvers<ContextType = any, ParentType extends ResolversParentTypes['Chat'] = ResolversParentTypes['Chat']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  sender?: Resolver<ResolversTypes['User'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  text?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  photoUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  audioUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  readCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
 };
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -310,6 +342,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>,
   reviews?: Resolver<Array<ResolversTypes['Review']>, ParentType, ContextType>,
   review?: Resolver<Maybe<ResolversTypes['Review']>, ParentType, ContextType, RequireFields<QueryReviewArgs, 'id'>>,
+  chats?: Resolver<Array<ResolversTypes['Chat']>, ParentType, ContextType>,
 };
 
 export type ReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['Review'] = ResolversParentTypes['Review']> = {
@@ -346,6 +379,7 @@ export type UserResolvers<ContextType = any, ParentType extends ResolversParentT
 
 export type Resolvers<ContextType = any> = {
   AuthPayload?: AuthPayloadResolvers<ContextType>,
+  Chat?: ChatResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
   Mutation?: MutationResolvers<ContextType>,

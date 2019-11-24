@@ -98,14 +98,23 @@ export const udpateUser = async ({
   );
 };
 
-export const getUser = async (User, id) => {
+export const getUserById = async (User, id, options = {}) => {
   return User.findOne({
     where: {
       id,
     },
     raw: true,
+    ...options,
   });
 };
+
+export const getUserByEmail = (User, email, queryOptions) => User.findOne({
+  raw: true,
+  where: {
+    email,
+  },
+  ...queryOptions,
+});
 
 export const hasUser = (user) => {
   return !user || (user && user[1] === false);

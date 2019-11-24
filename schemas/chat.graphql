@@ -7,7 +7,7 @@ type Chat {
   text: String
   photoUrl: String
   audioUrl: String
-  readCount: Integer
+  readCount: Int
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime

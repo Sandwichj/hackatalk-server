@@ -1,9 +1,18 @@
 import * as jwt from 'jsonwebtoken';
 
+import { getUserByEmail, hasUser } from './User';
+
 import { Role } from './Role';
-import { hasUser } from './User';
+
+export const { JWT_SECRET = 'undefined' } = process.env;
 
 export type Token = string;
+
+interface JwtUser {
+  userId: string;
+  role: number;
+  iat: number;
+}
 
 export interface Auth {
   id: string;
@@ -17,13 +26,7 @@ export const isSignedIn = async (User, user, queryOptions = {}) => {
     email,
   } = user;
 
-  const emailUser = User.findOne({
-    raw: true,
-    where: {
-      email,
-    },
-    ...queryOptions,
-  });
+  const emailUser = getUserByEmail(User, email, queryOptions);
 
   if (emailUser) {
     return true;
@@ -94,3 +97,7 @@ export const signIn = (userId, appSecret): Token => jwt.sign({
 },
 appSecret,
 );
+
+export const verifyUser = (token) => {
+  return jwt.verify(token, JWT_SECRET) as JwtUser;
+};

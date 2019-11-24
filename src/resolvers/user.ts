@@ -1,4 +1,3 @@
-import { Resolvers, UserResolvers } from '../generated/graphql';
 import {
   Token,
   getOrSignUp,
@@ -7,9 +6,10 @@ import {
   isValidUser,
   signIn,
 } from '../models/Auth';
-import { encryptPassword, validatePassword } from '../utils/password';
 
 import { AuthenticationError } from 'apollo-server-express';
+import { Resolvers } from '../generated/graphql';
+import { encryptPassword } from '../utils/password';
 import { getNotificationsByUserId } from '../models/Notification';
 import { getReviewsByUserId } from '../models/Review';
 import { udpateUser } from '../models/User';
@@ -27,18 +27,23 @@ const resolver: Resolvers = {
     users: async (
       _,
       args, {
-        getUser: getSignedInUser,
+        isSignedInUser,
         models,
       },
       info,
     ) => {
-      const signedInUser = await getSignedInUser();
+      const { User } = models;
+      const signedIn = await isSignedInUser();
 
-      if (!signedInUser) throw new AuthenticationError('User is not signed in');
+      if (!signedIn) throw new AuthenticationError('User is not signed in');
 
-      return models.User.findAll();
+      return User.findAll();
     },
-    user: (_, args, { models }) => models.User.findOne({ where: args }),
+    user: (_, args, { models }) => {
+      const { User } = models;
+
+      return User.findOne({ where: args });
+    },
   },
   Mutation: {
     signInGoogle: async (
