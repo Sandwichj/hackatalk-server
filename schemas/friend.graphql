@@ -3,7 +3,7 @@ scalar DateTime
 type Friend {
   id: String
   user: User!
-  friend: Friend!
+  friend: User!
   createdAt: DateTime!
   updatedAt: DateTime!
   deletedAt: DateTime

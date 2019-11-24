@@ -4,6 +4,7 @@
 # import Review from "review.graphql"
 # import Chatroom from "chatroom.graphql"
 # import Chat from "chat.graphql"
+# import Friend from "friend.graphql"
 
 type Query {
   users: [User!]!
@@ -12,6 +13,7 @@ type Query {
   review(id: ID!): Review
   chats: [Chat!]!
   chatrooms: [Chatroom!]!
+  friends: [Friend!]!
 }
 
 type Mutation {

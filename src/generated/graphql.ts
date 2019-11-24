@@ -44,6 +44,16 @@ export type Chatroom = {
 
 
 
+export type Friend = {
+   __typename?: 'Friend',
+  id?: Maybe<Scalars['String']>,
+  user: User,
+  friend: User,
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  deletedAt?: Maybe<Scalars['DateTime']>,
+};
+
 export enum Gender {
   Male = 'MALE',
   Female = 'FEMALE'
@@ -108,6 +118,7 @@ export type Query = {
   review?: Maybe<Review>,
   chats: Array<Chat>,
   chatrooms: Array<Chatroom>,
+  friends: Array<Friend>,
 };
 
 
@@ -273,6 +284,7 @@ export type ResolversTypes = {
   Chat: ResolverTypeWrapper<Chat>,
   Chatroom: ResolverTypeWrapper<Chatroom>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
+  Friend: ResolverTypeWrapper<Friend>,
   Mutation: ResolverTypeWrapper<{}>,
   SocialUserCreateInput: SocialUserCreateInput,
   AuthPayload: ResolverTypeWrapper<AuthPayload>,
@@ -298,6 +310,7 @@ export type ResolversParentTypes = {
   Chat: Chat,
   Chatroom: Chatroom,
   Int: Scalars['Int'],
+  Friend: Friend,
   Mutation: {},
   SocialUserCreateInput: SocialUserCreateInput,
   AuthPayload: AuthPayload,
@@ -342,6 +355,15 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'DateTime'
 }
 
+export type FriendResolvers<ContextType = any, ParentType extends ResolversParentTypes['Friend'] = ResolversParentTypes['Friend']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>,
+  friend?: Resolver<ResolversTypes['User'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   signInGoogle?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationSignInGoogleArgs, 'socialUser'>>,
   signInFacebook?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationSignInFacebookArgs, 'socialUser'>>,
@@ -366,6 +388,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   review?: Resolver<Maybe<ResolversTypes['Review']>, ParentType, ContextType, RequireFields<QueryReviewArgs, 'id'>>,
   chats?: Resolver<Array<ResolversTypes['Chat']>, ParentType, ContextType>,
   chatrooms?: Resolver<Array<ResolversTypes['Chatroom']>, ParentType, ContextType>,
+  friends?: Resolver<Array<ResolversTypes['Friend']>, ParentType, ContextType>,
 };
 
 export type ReviewResolvers<ContextType = any, ParentType extends ResolversParentTypes['Review'] = ResolversParentTypes['Review']> = {
@@ -406,6 +429,7 @@ export type Resolvers<ContextType = any> = {
   Chatroom?: ChatroomResolvers<ContextType>,
   Date?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
+  Friend?: FriendResolvers<ContextType>,
   Mutation?: MutationResolvers<ContextType>,
   Notification?: NotificationResolvers<ContextType>,
   Query?: QueryResolvers<ContextType>,
