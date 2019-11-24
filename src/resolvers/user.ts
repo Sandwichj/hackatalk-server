@@ -6,13 +6,13 @@ import {
   isValidUser,
   signIn,
 } from '../models/Auth';
+import { getUsers, udpateUser } from '../models/User';
 
 import { AuthenticationError } from 'apollo-server-express';
 import { Resolvers } from '../generated/graphql';
 import { encryptPassword } from '../utils/password';
 import { getNotificationsByUserId } from '../models/Notification';
 import { getReviewsByUserId } from '../models/Review';
-import { udpateUser } from '../models/User';
 import { withFilter } from 'apollo-server';
 
 const USER_ADDED = 'USER_ADDED';
@@ -37,7 +37,7 @@ const resolver: Resolvers = {
 
       if (!signedIn) throw new AuthenticationError('User is not signed in');
 
-      return User.findAll();
+      return getUsers(User);
     },
     user: (_, args, { models }) => {
       const { User } = models;

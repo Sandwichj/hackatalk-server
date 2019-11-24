@@ -98,6 +98,8 @@ export const udpateUser = async ({
   );
 };
 
+export const getUsers = async (User) => User.findAll();
+
 export const getUserById = async (User, id, options = {}) => {
   return User.findOne({
     where: {

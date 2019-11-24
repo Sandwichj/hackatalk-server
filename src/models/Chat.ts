@@ -1,6 +1,5 @@
 import {
   INTEGER,
-  IntegerDataType,
   Model,
   STRING,
   UUID,
@@ -56,7 +55,6 @@ Chat.init({
   paranoid: true,
 });
 
-Chat.hasOne(User);
 User.belongsTo(Chat, {
   as: 'sender',
 });

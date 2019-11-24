@@ -31,7 +31,7 @@ const createApolloServer = () => new ApolloServer({
       const token = getToken(req);
 
       if (!token) {
-        throw new Error('Token required.');
+        return null;
       }
 
       const user = verifyUser(token);
@@ -44,7 +44,7 @@ const createApolloServer = () => new ApolloServer({
       const token = getToken(req);
 
       if (!token) {
-        throw new Error('Token required.');
+        return false;
       }
 
       const user = verifyUser(token);
