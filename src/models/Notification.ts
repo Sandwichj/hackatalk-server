@@ -5,6 +5,7 @@ import {
   UUIDV4,
 } from 'sequelize';
 
+import User from './User';
 import sequelize from '../db';
 
 class Notification extends Model {}
@@ -28,6 +29,8 @@ Notification.init({
   timestamps: true,
   paranoid: true,
 });
+
+Notification.belongsTo(User);
 
 export const getNotificationsByUserId = (Notification, userId) => {
   return Notification.findAll({

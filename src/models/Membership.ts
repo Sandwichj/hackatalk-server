@@ -31,12 +31,12 @@ Membership.init({
   paranoid: true,
 });
 
-// Chatroom.belongsTo(Membership, {
-//   as: 'chatroom',
-// });
+Membership.hasOne(Chatroom, {
+  as: 'chatroom',
+});
 
-// User.belongsTo(Membership, {
-//   as: 'user',
-// });
+Membership.hasOne(User, {
+  as: 'user',
+});
 
 export default Membership;

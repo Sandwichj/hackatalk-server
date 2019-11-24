@@ -1,7 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
 
-import Notification from './Notification';
-import Review from './Review';
 import sequelize from '../db';
 
 const {
@@ -76,11 +74,6 @@ User.init({
   timestamps: true,
   paranoid: true,
 });
-
-User.hasMany(Notification);
-Notification.belongsTo(User);
-User.hasMany(Review);
-Review.belongsTo(User);
 
 export const udpateUser = async ({
   User,

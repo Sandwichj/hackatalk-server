@@ -29,13 +29,13 @@ Friend.init({
   paranoid: true,
 });
 
-// User.belongsTo(Friend, {
-//   as: 'friend',
-// });
+Friend.hasOne(User, {
+  as: 'friend',
+});
 
-// User.belongsTo(Friend, {
-//   as: 'user',
-// });
+Friend.hasOne(User, {
+  as: 'user',
+});
 
 export const getFriendsByUserId = (Friend, userId) => {
   return Friend.findAll({
