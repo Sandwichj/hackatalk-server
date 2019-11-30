@@ -7,11 +7,11 @@ import Review from './Review';
 import User from './User';
 
 export default {
-  Chat,
-  Chatroom,
-  Membership,
-  Notification,
   User,
   Friend,
+  Chatroom,
+  Chat,
+  Membership,
+  Notification,
   Review,
 };

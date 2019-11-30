@@ -40,6 +40,14 @@ Chat.init({
     allowNull: false,
     primaryKey: true,
   },
+  chatroomId: {
+    type: UUID,
+    allowNull: false,
+  },
+  senderId: {
+    type: UUID,
+    allowNull: false,
+  },
   type: {
     type: STRING,
     allowNull: false,
@@ -61,7 +69,7 @@ Chat.init({
 Chat.belongsTo(Chatroom, {
   as: 'chatroom',
 });
-User.belongsTo(Chat, {
+Chat.belongsTo(User, {
   as: 'sender',
 });
 

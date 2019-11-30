@@ -9,7 +9,7 @@ import sequelize from '../db';
 
 class Chatroom extends Model {
   public id!: string;
-  public ownerId: string;
+  public ownerId!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date;
@@ -21,6 +21,10 @@ Chatroom.init({
     allowNull: false,
     primaryKey: true,
   },
+  ownerId: {
+    type: UUID,
+    allowNull: false,
+  },
 }, {
   sequelize,
   modelName: 'chatroom',
@@ -28,7 +32,7 @@ Chatroom.init({
   paranoid: true,
 });
 
-User.belongsTo(Chatroom, {
+Chatroom.belongsTo(User, {
   as: 'owner',
 });
 

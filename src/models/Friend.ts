@@ -9,8 +9,8 @@ import sequelize from '../db';
 
 class Friend extends Model {
   public id!: string;
-  public userId: string;
-  public friendId: string;
+  public userId!: string;
+  public friendId!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date;
@@ -22,6 +22,14 @@ Friend.init({
     allowNull: false,
     primaryKey: true,
   },
+  userId: {
+    type: UUID,
+    allowNull: false,
+  },
+  friendId: {
+    type: UUID,
+    allowNull: false,
+  },
 }, {
   sequelize,
   modelName: 'friend',
@@ -29,11 +37,11 @@ Friend.init({
   paranoid: true,
 });
 
-Friend.hasOne(User, {
+Friend.belongsTo(User, {
   as: 'friend',
 });
 
-Friend.hasOne(User, {
+Friend.belongsTo(User, {
   as: 'user',
 });
 

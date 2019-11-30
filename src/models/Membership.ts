@@ -1,5 +1,6 @@
 import {
   Model,
+  STRING,
   UUID,
   UUIDV4,
 } from 'sequelize';
@@ -10,8 +11,8 @@ import sequelize from '../db';
 
 class Membership extends Model {
   public id!: string;
-  public chatroomId: string;
-  public userId: string;
+  public chatroomId!: string;
+  public userId!: string;
   public type: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -24,18 +25,29 @@ Membership.init({
     allowNull: false,
     primaryKey: true,
   },
+  chatroomId: {
+    type: UUID,
+    allowNull: false,
+  },
+  userId: {
+    type: UUID,
+    allowNull: false,
+  },
+  type: {
+    type: STRING,
+  },
 }, {
   sequelize,
-  modelName: 'chatroom',
+  modelName: 'membership',
   timestamps: true,
   paranoid: true,
 });
 
-Membership.hasOne(Chatroom, {
+Membership.belongsTo(Chatroom, {
   as: 'chatroom',
 });
 
-Membership.hasOne(User, {
+Membership.belongsTo(User, {
   as: 'user',
 });
 
